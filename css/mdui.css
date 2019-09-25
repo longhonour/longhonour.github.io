@@ -12608,22 +12608,24 @@ body.mdui-loaded .mdui-drawer {
 .mdui-menu-item {
   position: relative;
 }
-.mdui-menu-item > span {
+.mdui-menu-item > a {
   position: relative;
   display: block;
-  height: 24px;
+  height: 48px;
   padding: 0 16px;
   overflow: hidden;
-  line-height: 24px;
+  line-height: 48px;
   color: inherit;
   text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: default;
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
+}
+.mdui-menu-item > a:hover {
+  background-color: #eee;
 }
 .mdui-menu-item > .mdui-menu {
   position: absolute;
