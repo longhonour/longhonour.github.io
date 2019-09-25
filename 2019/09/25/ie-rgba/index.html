@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="renderer" content="webkit">
+
+  
+  <title>解决ie低版本浏览器兼容rgba属性 | 哆龙的博客</title>
+
+  <link rel="shortcut icon" href="/images/favicon.png">
+  
+  <meta name="description" content="在使用rgba设置元素颜色属性时，ie低版本存在兼容性问题。 html代码如下&amp;lt;div class=&amp;quot;test&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;img/1.png&amp;quot;&amp;gt;&amp;lt;i&amp;gt;覆盖文字&amp;lt;/i&amp;gt;&amp;lt;/div&amp;gt; CSS代码如下IE10，IE8,IE7均显示正常，但在IE9下却出现问题：问题所在：ie9下会重复应用fil">
+<meta name="keywords" content="css">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决ie低版本浏览器兼容rgba属性">
+<meta property="og:url" content="https://longhonour.github.io/2019/09/25/ie-rgba/index.html">
+<meta property="og:site_name" content="哆龙的博客">
+<meta property="og:description" content="在使用rgba设置元素颜色属性时，ie低版本存在兼容性问题。 html代码如下&amp;lt;div class=&amp;quot;test&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;img/1.png&amp;quot;&amp;gt;&amp;lt;i&amp;gt;覆盖文字&amp;lt;/i&amp;gt;&amp;lt;/div&amp;gt; CSS代码如下IE10，IE8,IE7均显示正常，但在IE9下却出现问题：问题所在：ie9下会重复应用fil">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398942-17d1a180-8089-11e9-92e2-85396132f6b2.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398954-24ee9080-8089-11e9-9b53-94fdbdb1055e.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398959-2750ea80-8089-11e9-862c-0d45619800e9.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398975-2d46cb80-8089-11e9-823a-5cbcca93d36d.png">
+<meta property="og:updated_time" content="2019-09-25T08:55:21.984Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="解决ie低版本浏览器兼容rgba属性">
+<meta name="twitter:description" content="在使用rgba设置元素颜色属性时，ie低版本存在兼容性问题。 html代码如下&amp;lt;div class=&amp;quot;test&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;img/1.png&amp;quot;&amp;gt;&amp;lt;i&amp;gt;覆盖文字&amp;lt;/i&amp;gt;&amp;lt;/div&amp;gt; CSS代码如下IE10，IE8,IE7均显示正常，但在IE9下却出现问题：问题所在：ie9下会重复应用fil">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/13929056/58398942-17d1a180-8089-11e9-92e2-85396132f6b2.png">
+
+  <meta name="format-detection" content="telephone=no,email=no">
+  <meta name="theme-color" content="#9C27B0">
+  <meta name="description" content>
+  <meta name="keywords" content=",css">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="哆龙的博客">
+  <meta name="msapplication-starturl" content="https://longhonour.github.io/2019/09/25/ie-rgba/">
+  <meta name="msapplication-navbutton-color" content="#9C27B0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="哆龙的博客">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+
+  
+    <meta property="article:published_time" content="Wed Sep 25 2019 16:52:42 GMT+0800">
+    <meta property="article:modified_time" content="Wed Sep 25 2019 16:55:21 GMT+0800">
+  
+
+  
+    <link rel="canonical" href="https://longhonour.github.io/2019/09/25/ie-rgba/">
+  
+
+  
+  
+
+  
+  
+  
+
+  <link rel="stylesheet" href="/css/mdui.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-deep-purple mdui-theme-accent-blue">
+  <script>var a=localStorage.getItem("mdui-theme-layout-dark");if(a){document.getElementsByTagName("body")[0].className+=" mdui-theme-layout-dark"};</script>
+  <header id="header" class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset">
+  <div class="mdui-toolbar mdui-color-theme">
+    <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#sidebar', swipe: true}"><i class="mdui-icon material-icons">menu</i></a>
+    <a href="/" class="mdui-typo-headline">哆龙的博客</a>
+    <div class="mdui-toolbar-spacer"></div>
+    <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-dialog="{target: '#search'}" mdui-tooltip="{content: '搜索'}"><i class="mdui-icon material-icons">search</i></a>
+    
+  </div>
+</header>
+<div class="mdui-dialog" id="search">
+  
+    <div class="search-form">
+      <input type="search" class="search-form-input" placeholder="请输入关键字搜索">
+    </div>
+    <div class="search-result" data-resource="/search.xml"></div>
+  
+</div>
+  <aside id="sidebar" class="mdui-drawer mdui-drawer-full-height">
+  <div class="mdui-grid-tile">
+    <img src="/images/banner.png" style="height: 160px;">
+    <img src="/images/avatar.png" class="avatar-animation" style="position: absolute; top: 10%; left: 50%; margin-left: -32px; width: 64px; height: 64px; border: 2px solid #fff; border-radius: 50%;">
+    <div class="mdui-grid-tile-actions">
+      <div class="mdui-grid-tile-text">
+        <div class="mdui-grid-tile-title">Cao Long</div>
+        <div class="mdui-grid-tile-subtitle"><i class="mdui-icon material-icons">art_track</i>竹杖芒鞋轻胜马，谁怕？</div>
+      </div>
+      
+        <div class="mdui-grid-tile-buttons">
+          <a href="mailto:2286410840cl@gmail.com" class="mdui-btn mdui-btn-icon" mdui-tooltip="{content: '2286410840cl@gmail.com'}"><i class="mdui-icon material-icons">email</i></a>
+        </div>
+      
+    </div>
+  </div>
+
+  <div class="mdui-list" mdui-collapse="{accordion: true}">
+    <a href="/" class="mdui-list-item mdui-ripple">
+      <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue">home</i>
+      <div class="mdui-list-item-content">主页</div>
+    </a>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-deep-orange">inbox</i>
+        <div class="mdui-list-item-content">归档</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/archives/2019/09/">九月 2019<span class="mdui-ripple sidebar_archives-count">3</span></a>
+        
+      </div>
+    </div>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-green">chrome_reader_mode</i>
+        <div class="mdui-list-item-content">分类</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/categories/web前端/">web前端<span class="mdui-ripple sidebar_archives-count">3</span></a>
+        
+      </div>
+    </div>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-brown">bookmark</i>
+        <div class="mdui-list-item-content">标签</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/tags/css/">css<span class="mdui-ripple sidebar_archives-count">2</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/js/">js<span class="mdui-ripple sidebar_archives-count">2</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/webpack/">webpack<span class="mdui-ripple sidebar_archives-count">1</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/浏览器原理/">浏览器原理<span class="mdui-ripple sidebar_archives-count">1</span></a>
+        
+      </div>
+    </div>
+    <a href="/about" class="mdui-list-item mdui-ripple">
+      <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-purple">person</i>
+      <div class="mdui-list-item-content">关于</div>
+    </a>
+  </div>
+
+  <div class="mdui-divider"></div>
+
+  <div class="mdui-list" mdui-collapse="{accordion: true}">
+    
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">友情链接</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">link</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+          <a href="https://github.com/longhonour" target="_blank" class="mdui-list-item mdui-ripple mdui-p-l-2 mdui-text-color-theme-accent" style="justify-content: center;">Github</a>
+        
+        
+      </div>
+    </div>
+  </div>
+</aside>
+  <main id="main" class="mdui-m-t-5 fadeIn animated">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/fancybox/3.5.7/jquery.fancybox.min.css">
+  <style>#main article .mdui-card-content .center-block{display:block!important;margin-right:auto!important;margin-left:auto!important}</style>
+  <article class="mdui-card mdui-m-b-5">
+    <header class="mdui-card-media">
+      <img src="/images/random/material-18.png" style="max-height: 240px;">
+      <div class="mdui-card-media-covered">
+        <div class="mdui-card-primary">
+          <div class="mdui-card-primary-title">解决ie低版本浏览器兼容rgba属性</div>
+          <div class="mdui-card-primary-subtitle"><i class="iconfont">&#xe697;</i> 2019-09-25 / <i class="iconfont">&#xe601;</i> Cao Long</div>
+        </div>
+      </div>
+      <div class="mdui-card-menu">
+        
+          <button class="mdui-btn mdui-btn-icon mdui-text-color-white" mdui-menu="{target: '#qrcode', align: 'right'}"><i class="mdui-icon material-icons">devices</i></button>
+          <ul class="mdui-menu" id="qrcode">
+            
+              <li class="mdui-menu-item"><a class="mdui-text-center mdui-ripple">移动端查看</a></li>
+            
+            <li class="mdui-menu-item" disabled>
+              
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACY0lEQVR42u3aQVbDMAwFwN7/0nAAXs2XZETgTVZdpE3GC1v90uvjX18vPDw8PDw8PDy8h/Fe8fXuW+9+5+v95zvPTym8Gx4eHt4K75utNnhw8kJn8Plz4d3w8PDwFnnJlp3AkoU4HzCj4wQPDw/vkbzzBp0XyreWFQ8PD++v8M4l77mMrt6Ph4eH90xe8uBesNs7SH4ha8HDw8OLeXmTaf/zan8PDw8PL+CVR5qultTJ667OlOHh4eEFvF7j/25x3DsY8PDw8H6LlzT482ggaZL1xlWTUQM8PDy8HV71Afmi9EYQ8mZY89zDw8PDG/Mmja7zPXkA0fvW20XHw8PDW+flJWw1cp0U68lS4uHh4e3wkr/3ScBaDV6r7bHC0YWHh4e3yCuPNxWb/VVqNfbFw8PD2+fNQ9h8K58HxIWUGg8PD2+RV32tXvsqOQCuhRF4eHh4V3mTSCK/59bQVTOMwMPDwxvzqj/Xa1nlra9JDIGHh4e3w6uOPVVL4WpY3LsfDw8Pb5+XPObWYFYSHE+abXh4eHg7vGZgOghzqwV9IRTGw8PDW+Tl4F5Q22uJ5fExHh4e3j6v2gbrfbdZKN+KcfHw8PCu8qobd3Urz1+9Gt3i4eHhbfKqV3JUVEvhybBXYegKDw8P7xKv16SvHgy3lqZZUuPh4eH9AG8SBEzaYIVRqriwxsPDw9vk3d2gq9Qfz1rw8PDwHsBLIoZqC20SHOPh4eE9mZcPVCW/nC/QUkmNh4eHdzWM6AGScjkPQfDw8PCewMsjgPl4a3I8VIcJ8PDw8DZ5/+/Cw8PDw8PDw8N7wPUJFO4MN7dF9R8AAAAASUVORK5CYII=">
+              
+            </li>
+          </ul>
+        
+        
+          <button class="mdui-btn mdui-btn-icon mdui-text-color-white" mdui-menu="{target: '#share_menu', align: 'right'}"><i class="mdui-icon material-icons">share</i></button>
+          <ul class="mdui-menu" id="share_menu">
+            <li class="mdui-menu-item">
+              <a href="http://service.weibo.com/share/share.php?appkey=&title=解决ie低版本浏览器兼容rgba属性&url=https://longhonour.github.io/2019/09/25/ie-rgba/&pic=https://longhonour.github.io/images/favicon.png&searchPic=false&style=simple" target="_blank" class="mdui-ripple">分享到微博</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://twitter.com/intent/tweet?text=解决ie低版本浏览器兼容rgba属性&url=https://longhonour.github.io/2019/09/25/ie-rgba/&via=Cao Long" target="_blank" class="mdui-ripple">分享到Twitter</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https://longhonour.github.io/2019/09/25/ie-rgba/" target="_blank" class="mdui-ripple">分享到Facebook</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://longhonour.github.io/2019/09/25/ie-rgba/&title=解决ie低版本浏览器兼容rgba属性" target="_blank" class="mdui-ripple">分享到LinkedIn</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="http://connect.qq.com/widget/shareqq/index.html?site=哆龙的博客&title=解决ie低版本浏览器兼容rgba属性&summary=&pics=https://longhonour.github.io/images/favicon.png&url=https://longhonour.github.io/2019/09/25/ie-rgba/" target="_blank" class="mdui-ripple">分享到QQ</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://telegram.me/share/url?url=https://longhonour.github.io/2019/09/25/ie-rgba/&text=解决ie低版本浏览器兼容rgba属性" target="_blank" class="mdui-ripple">分享到Telegram</a>
+            </li>
+          </ul>
+        
+      </div>
+    </header>
+    <div class="mdui-card-content mdui-typo">
+      <p>在使用rgba设置元素颜色属性时，ie低版本存在兼容性问题。</p>
+<p>html代码如下<br><code>&lt;div class=&quot;test&quot;&gt;&lt;img src=&quot;img/1.png&quot;&gt;&lt;i&gt;覆盖文字&lt;/i&gt;&lt;/div&gt;</code></p>
+<p>CSS代码如下<br><img src="https://user-images.githubusercontent.com/13929056/58398942-17d1a180-8089-11e9-92e2-85396132f6b2.png" alt="image"><br>IE10，IE8,IE7均显示正常，<br><img src="https://user-images.githubusercontent.com/13929056/58398954-24ee9080-8089-11e9-9b53-94fdbdb1055e.png" alt="image"><br><img src="https://user-images.githubusercontent.com/13929056/58398959-2750ea80-8089-11e9-862c-0d45619800e9.png" alt="image"><br>但在IE9下却出现问题：<br><img src="https://user-images.githubusercontent.com/13929056/58398975-2d46cb80-8089-11e9-823a-5cbcca93d36d.png" alt="image"><br>问题所在：<br>ie9下会重复应用filter和rgba导致透明度失效<br><strong>解决方法：</strong><br>方法1：<br>取消ie9下的滤镜css：</p>
+<p><strong>:root .test i{filter:none;}</strong> </p>
+<p>取消ie9下的滤镜css：</p>
+<p>:root .test i{filter:none;} </p>
+<p>这里用到了CSS3 :root 选择器：所有主流浏览器均支持 :root 选择器，除了 IE8 及更早的版本，而滤镜filter只有ie9以及更低的ie版本才支持，ie10开始已废弃不支持filter，这样刚好可利用:root来实现针对ie9的hack!!<br>装了ie10或更高版本的ie，可用ietester新建ie9模式标签查看上面代码运行效果。<br>(注意：装了ie10或更高版本的ie，即使将文档模式调成ie9，会发现上面 的代码也显示正确，合理的解释是：ie10开始已废弃不支持filter，即使文档模式调成ie9，filter也不会生效！另外提一下 css \9 写法是针对ie所有版本的hack写法，网上说的只是针对ie6~8的hack说法是错误的！)<br>全兼容完整代码如下：<br><code>.test i{
+         background:rgba(0,0,0,.8);
+         filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#b2000000, endColorstr=#b2000000);
+}
+:root .test i{filter:none;}</code></p>
+<p>输入十六进制的颜色值以及透明度，自动在IE的过渡滤镜以及CSS3中的rgba属性之间进行十六进制与十进制的换算。在线转换工具<br><a href="http://linxz.github.io/tianyizone/hex_color.html" target="_blank" rel="noopener">http://linxz.github.io/tianyizone/hex_color.html</a><br>`</p>
+<h2 id="输入十六进制的颜色值以及透明度，自动在IE的过渡滤镜以及CSS3中的rgba属性之间进行十六进制与十进制的换算。在线转换工具http-linxz-github-io-tianyizone-hex-color-html"><a href="#输入十六进制的颜色值以及透明度，自动在IE的过渡滤镜以及CSS3中的rgba属性之间进行十六进制与十进制的换算。在线转换工具http-linxz-github-io-tianyizone-hex-color-html" class="headerlink" title="输入十六进制的颜色值以及透明度，自动在IE的过渡滤镜以及CSS3中的rgba属性之间进行十六进制与十进制的换算。在线转换工具http://linxz.github.io/tianyizone/hex_color.html"></a>输入十六进制的颜色值以及透明度，自动在IE的过渡滤镜以及CSS3中的rgba属性之间进行十六进制与十进制的换算。在线转换工具<a href="http://linxz.github.io/tianyizone/hex_color.html" target="_blank" rel="noopener">http://linxz.github.io/tianyizone/hex_color.html</a></h2><p>`</p>
+
+      <blockquote class="mdui-m-t-5">
+        
+        <strong>本文链接：</strong><a href="https://longhonour.github.io/2019/09/25/ie-rgba/">https://longhonour.github.io/2019/09/25/ie-rgba/</a>
+      </blockquote>
+      
+    </div>
+    <footer class="mdui-card-actions">
+      
+        <a class="mdui-ripple article_categories-link" href="/categories/web前端/">web前端</a>
+      
+      
+        <a class="mdui-ripple article_tags-link" href="/tags/css/">css</a>
+      
+    </footer>
+    
+  </article>
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script>$("#main article .mdui-card-content img.fancybox").on("click",function(e){$.fancybox.open({src:$(this).attr("src")});});</script>
+
+
+  <nav id="paginator">
+    
+      <a rel="prev" class="extend prev" href="/2019/09/25/webpack-ie/">
+        <button aria-label="prev" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-btn-icon mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">arrow_back</i></button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上一篇
+      </a>
+    
+    <div class="spacer"></div>
+    
+      <a rel="next" class="extend next" href="/2019/09/25/brower-cache/">
+        下一篇&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button aria-label="next" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-btn-icon mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">arrow_forward</i></button>
+      </a>
+    
+  </nav>
+
+
+
+</main>
+  <footer id="footer" class="mdui-m-t-5 mdui-p-y-3 mdui-color-theme">
+  <div class="mdui-p-y-0 mdui-text-center">
+    
+    
+    
+    
+    
+    
+    
+      <a href="https://github.com/longhonour" target="_blank"><i class="mdui-p-a-1 mdui-icon iconfont mdui-text-color-theme-a100">&#xe7ab;</i></a>
+    
+    
+    
+    
+    
+    
+  </div>
+  <div class="mdui-p-y-1 mdui-text-center">
+    Copyright &copy; 2019 - 2019 Cao Long<br>
+    
+  </div>
+</footer>
+  <button id="gotop" class="mdui-fab mdui-fab-fixed mdui-fab-hide mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">arrow_upward</i></button>
+  
+  <script src="/js/mdui.js"></script>
+<script src="/js/script.js"></script>
+</body>
+</html>

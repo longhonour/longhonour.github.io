@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="renderer" content="webkit">
+
+  
+  <title>图解浏览器缓存，教你提高用户体验 | 哆龙的博客</title>
+
+  <link rel="shortcut icon" href="/images/favicon.png">
+  
+  <meta name="description" content="1.1 区分Expires和Cache-Control以一个接口返回的响应头为例：这里我画了张思维导图，对Expires和Cache-Control做比较：具体介绍Expires和Cache-Control： Expires: (1)Expires是HTTP1.0的东西，现在默认浏览器均默认使用HTTP 1.1，所以它的作用基本忽略； (2)Expires规定了缓存失效时间（Date为当前时间），">
+<meta name="keywords" content="css,js,浏览器原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图解浏览器缓存，教你提高用户体验">
+<meta property="og:url" content="https://longhonour.github.io/2019/09/25/brower-cache/index.html">
+<meta property="og:site_name" content="哆龙的博客">
+<meta property="og:description" content="1.1 区分Expires和Cache-Control以一个接口返回的响应头为例：这里我画了张思维导图，对Expires和Cache-Control做比较：具体介绍Expires和Cache-Control： Expires: (1)Expires是HTTP1.0的东西，现在默认浏览器均默认使用HTTP 1.1，所以它的作用基本忽略； (2)Expires规定了缓存失效时间（Date为当前时间），">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398559-02a84300-8088-11e9-9b00-45fed12a8353.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398566-089e2400-8088-11e9-9308-6252caff9978.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398600-29ff1000-8088-11e9-86d8-771ff072be59.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398611-32efe180-8088-11e9-9f1f-809c6fceaa67.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398639-43a05780-8088-11e9-8eea-8ab389d4252c.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398670-60d52600-8088-11e9-8955-236f22e96ed0.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398678-67639d80-8088-11e9-9687-9ada8acca7ca.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13929056/58398736-911cc480-8088-11e9-8ed6-5661b22fb14e.png">
+<meta property="og:updated_time" content="2019-09-25T08:55:14.882Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="图解浏览器缓存，教你提高用户体验">
+<meta name="twitter:description" content="1.1 区分Expires和Cache-Control以一个接口返回的响应头为例：这里我画了张思维导图，对Expires和Cache-Control做比较：具体介绍Expires和Cache-Control： Expires: (1)Expires是HTTP1.0的东西，现在默认浏览器均默认使用HTTP 1.1，所以它的作用基本忽略； (2)Expires规定了缓存失效时间（Date为当前时间），">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/13929056/58398559-02a84300-8088-11e9-9b00-45fed12a8353.png">
+
+  <meta name="format-detection" content="telephone=no,email=no">
+  <meta name="theme-color" content="#9C27B0">
+  <meta name="description" content>
+  <meta name="keywords" content=",css,js,浏览器原理">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="哆龙的博客">
+  <meta name="msapplication-starturl" content="https://longhonour.github.io/2019/09/25/brower-cache/">
+  <meta name="msapplication-navbutton-color" content="#9C27B0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="哆龙的博客">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+
+  
+    <meta property="article:published_time" content="Wed Sep 25 2019 16:47:20 GMT+0800">
+    <meta property="article:modified_time" content="Wed Sep 25 2019 16:55:14 GMT+0800">
+  
+
+  
+    <link rel="canonical" href="https://longhonour.github.io/2019/09/25/brower-cache/">
+  
+
+  
+  
+
+  
+  
+  
+
+  <link rel="stylesheet" href="/css/mdui.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-deep-purple mdui-theme-accent-blue">
+  <script>var a=localStorage.getItem("mdui-theme-layout-dark");if(a){document.getElementsByTagName("body")[0].className+=" mdui-theme-layout-dark"};</script>
+  <header id="header" class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset">
+  <div class="mdui-toolbar mdui-color-theme">
+    <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#sidebar', swipe: true}"><i class="mdui-icon material-icons">menu</i></a>
+    <a href="/" class="mdui-typo-headline">哆龙的博客</a>
+    <div class="mdui-toolbar-spacer"></div>
+    <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-dialog="{target: '#search'}" mdui-tooltip="{content: '搜索'}"><i class="mdui-icon material-icons">search</i></a>
+    
+  </div>
+</header>
+<div class="mdui-dialog" id="search">
+  
+    <div class="search-form">
+      <input type="search" class="search-form-input" placeholder="请输入关键字搜索">
+    </div>
+    <div class="search-result" data-resource="/search.xml"></div>
+  
+</div>
+  <aside id="sidebar" class="mdui-drawer mdui-drawer-full-height">
+  <div class="mdui-grid-tile">
+    <img src="/images/banner.png" style="height: 160px;">
+    <img src="/images/avatar.png" class="avatar-animation" style="position: absolute; top: 10%; left: 50%; margin-left: -32px; width: 64px; height: 64px; border: 2px solid #fff; border-radius: 50%;">
+    <div class="mdui-grid-tile-actions">
+      <div class="mdui-grid-tile-text">
+        <div class="mdui-grid-tile-title">Cao Long</div>
+        <div class="mdui-grid-tile-subtitle"><i class="mdui-icon material-icons">art_track</i>竹杖芒鞋轻胜马，谁怕？</div>
+      </div>
+      
+        <div class="mdui-grid-tile-buttons">
+          <a href="mailto:2286410840cl@gmail.com" class="mdui-btn mdui-btn-icon" mdui-tooltip="{content: '2286410840cl@gmail.com'}"><i class="mdui-icon material-icons">email</i></a>
+        </div>
+      
+    </div>
+  </div>
+
+  <div class="mdui-list" mdui-collapse="{accordion: true}">
+    <a href="/" class="mdui-list-item mdui-ripple">
+      <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue">home</i>
+      <div class="mdui-list-item-content">主页</div>
+    </a>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-deep-orange">inbox</i>
+        <div class="mdui-list-item-content">归档</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/archives/2019/09/">九月 2019<span class="mdui-ripple sidebar_archives-count">3</span></a>
+        
+      </div>
+    </div>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-green">chrome_reader_mode</i>
+        <div class="mdui-list-item-content">分类</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/categories/web前端/">web前端<span class="mdui-ripple sidebar_archives-count">3</span></a>
+        
+      </div>
+    </div>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-brown">bookmark</i>
+        <div class="mdui-list-item-content">标签</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/tags/css/">css<span class="mdui-ripple sidebar_archives-count">2</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/js/">js<span class="mdui-ripple sidebar_archives-count">2</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/webpack/">webpack<span class="mdui-ripple sidebar_archives-count">1</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/浏览器原理/">浏览器原理<span class="mdui-ripple sidebar_archives-count">1</span></a>
+        
+      </div>
+    </div>
+    <a href="/about" class="mdui-list-item mdui-ripple">
+      <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-purple">person</i>
+      <div class="mdui-list-item-content">关于</div>
+    </a>
+  </div>
+
+  <div class="mdui-divider"></div>
+
+  <div class="mdui-list" mdui-collapse="{accordion: true}">
+    
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">友情链接</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">link</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+          <a href="https://github.com/longhonour" target="_blank" class="mdui-list-item mdui-ripple mdui-p-l-2 mdui-text-color-theme-accent" style="justify-content: center;">Github</a>
+        
+        
+      </div>
+    </div>
+  </div>
+</aside>
+  <main id="main" class="mdui-m-t-5 fadeIn animated">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/fancybox/3.5.7/jquery.fancybox.min.css">
+  <style>#main article .mdui-card-content .center-block{display:block!important;margin-right:auto!important;margin-left:auto!important}</style>
+  <article class="mdui-card mdui-m-b-5">
+    <header class="mdui-card-media">
+      <img src="/images/random/material-12.png" style="max-height: 240px;">
+      <div class="mdui-card-media-covered">
+        <div class="mdui-card-primary">
+          <div class="mdui-card-primary-title">图解浏览器缓存，教你提高用户体验</div>
+          <div class="mdui-card-primary-subtitle"><i class="iconfont">&#xe697;</i> 2019-09-25 / <i class="iconfont">&#xe601;</i> Cao Long</div>
+        </div>
+      </div>
+      <div class="mdui-card-menu">
+        
+          <button class="mdui-btn mdui-btn-icon mdui-text-color-white" mdui-menu="{target: '#qrcode', align: 'right'}"><i class="mdui-icon material-icons">devices</i></button>
+          <ul class="mdui-menu" id="qrcode">
+            
+              <li class="mdui-menu-item"><a class="mdui-text-center mdui-ripple">移动端查看</a></li>
+            
+            <li class="mdui-menu-item" disabled>
+              
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACX0lEQVR42u3aQZICIQwFUO9/6ZkDTHX7kwDTWo+VpWXLYwH4k9fPV48XHh4eHh4eHh7ew3iveFw+7s+n9+9cPfnqW9W54eHh4Z3hvdlqA8DVty4nESCbc8PDw8M7yMt/Mtn6kynmvMJxgoeHh/dIXr5x32N6y4qHh4f3fbz759zzFkQYeHh4eAd5yR/+JGLID4lkmY5mLXh4eHgxLy8ynX99tL6Hh4eHF/Cqo3okVKf+Mx54eHh4u3n5Rtxj52WwVfPBw8PDO8nrhQjRNbd4Wb9vLFgc4+Lh4eEVeckW3ytlTQLfvKmr/I8BDw8Pb8yrPqhX/p8ExNXwAg8PD283b9Xkepv4jvgYDw8P7wwvj2LzT6vlrjyMeAPGw8PD28zLfyZBXmHy9oJJ7IuHh4d3kpdPIg8vegt3v0DNGBcPDw9vKW8y0R61GtGWL+J4eHh4m3l5ISoPZOdLk7QsFMIIPDw8vA28XpE+n8ocsLjpCg8PD2/MqxafkmggCTXya/SopwwPDw9vAy9/aPUSXF3KajssHh4e3nN4eRGrV76aLNabGeLh4eEd5CWxbB4i9KLeJIBoXqnx8PDwjvAm23pytBQiBjw8PLxH8lY1DZQbTFuBCB4eHt5/8aojaRHII9pema3QdIWHh4e3gdcr0lcLXZO2repBhYeHh3eGtzZy7R0M1efg4eHhPYFXLT71Svurwgg8PDy8z+JN2NVfKZfi8PDw8D6cN7lMVyNjPDw8vPO85Mqbv1/d3KvtBXh4eHj/y5tv6HmEUT2QyouLh4eHt5n3fQMPDw8PDw8PD+8B4xd0yeNf0RH/4AAAAABJRU5ErkJggg==">
+              
+            </li>
+          </ul>
+        
+        
+          <button class="mdui-btn mdui-btn-icon mdui-text-color-white" mdui-menu="{target: '#share_menu', align: 'right'}"><i class="mdui-icon material-icons">share</i></button>
+          <ul class="mdui-menu" id="share_menu">
+            <li class="mdui-menu-item">
+              <a href="http://service.weibo.com/share/share.php?appkey=&title=图解浏览器缓存，教你提高用户体验&url=https://longhonour.github.io/2019/09/25/brower-cache/&pic=https://longhonour.github.io/images/favicon.png&searchPic=false&style=simple" target="_blank" class="mdui-ripple">分享到微博</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://twitter.com/intent/tweet?text=图解浏览器缓存，教你提高用户体验&url=https://longhonour.github.io/2019/09/25/brower-cache/&via=Cao Long" target="_blank" class="mdui-ripple">分享到Twitter</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https://longhonour.github.io/2019/09/25/brower-cache/" target="_blank" class="mdui-ripple">分享到Facebook</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://longhonour.github.io/2019/09/25/brower-cache/&title=图解浏览器缓存，教你提高用户体验" target="_blank" class="mdui-ripple">分享到LinkedIn</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="http://connect.qq.com/widget/shareqq/index.html?site=哆龙的博客&title=图解浏览器缓存，教你提高用户体验&summary=&pics=https://longhonour.github.io/images/favicon.png&url=https://longhonour.github.io/2019/09/25/brower-cache/" target="_blank" class="mdui-ripple">分享到QQ</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://telegram.me/share/url?url=https://longhonour.github.io/2019/09/25/brower-cache/&text=图解浏览器缓存，教你提高用户体验" target="_blank" class="mdui-ripple">分享到Telegram</a>
+            </li>
+          </ul>
+        
+      </div>
+    </header>
+    <div class="mdui-card-content mdui-typo">
+      <h3 id="1-1-区分Expires和Cache-Control"><a href="#1-1-区分Expires和Cache-Control" class="headerlink" title="1.1 区分Expires和Cache-Control"></a>1.1 区分Expires和Cache-Control</h3><p>以一个接口返回的响应头为例：<br><img src="https://user-images.githubusercontent.com/13929056/58398559-02a84300-8088-11e9-9b00-45fed12a8353.png" alt="image"><br>这里我画了张思维导图，对Expires和Cache-Control做比较：<br><img src="https://user-images.githubusercontent.com/13929056/58398566-089e2400-8088-11e9-9308-6252caff9978.png" alt="image"><br>具体介绍Expires和Cache-Control：</p>
+<p>Expires:</p>
+<p>(1)Expires是HTTP1.0的东西，现在默认浏览器均默认使用HTTP 1.1，所以它的作用基本忽略；</p>
+<p>(2)Expires规定了缓存失效时间（Date为当前时间），是绝对时间。由于Expires返回的是一个绝对时间，在服务器时间与客户端时间相差较大的时候，缓存命中不准确；</p>
+<p>Cache-Control：</p>
+<p>(1)Cache-Control是HTTP1.1的</p>
+<p>(2)Cache-Control的max-age规定了缓存有效时间（2552s)，是相对时间；</p>
+<p>(3)若响应头Expires和Cache-Control同时存在，Cache-Control优先级高于Expires</p>
+<p>Cache-Control的常用指令：</p>
+<p>no-cache：不使用本地缓存，需要使用协商缓存，也就是先与服务器确认缓存是否可用。</p>
+<p>no-store：禁用缓存。用于防止重要的信息被无意的发布。在请求消息中发送将使得请求和响应消息都不使用缓存。</p>
+<p>public：其他用户也可使用缓存，适用于公共缓存服务器的情况。</p>
+<p>private：只有特定用户才能使用缓存，适用于公共缓存服务器的情况。</p>
+<p>max-age：客户机可以接收生存期不大于指定时间（以秒为单位）的响应。</p>
+<p>min-fresh客户机可以接收响应时间小于当前时间加上指定时间的响应。</p>
+<p>max-stale指示客户机可以接收超出超时期间的响应消息。如果指定max-stale消息的值，那么客户机可以接收超出超时期指定值之内的响应消息。</p>
+<p>注意：no-cache指令并不是不缓存，no-cache的意思是可以缓存，但每次用应该去向服务器验证缓存是否可用。no-store才是不缓存内容。</p>
+<h3 id="1-2-强缓存的过程"><a href="#1-2-强缓存的过程" class="headerlink" title="1.2 强缓存的过程"></a>1.2 强缓存的过程</h3><p>强缓存：浏览器直接从本地缓存中获取数据，不与服务器进行交互。</p>
+<p>· 浏览器第一次跟服务器请求一个资源，服务器在返回这个资源的同时，在response的header会加上Expires/Cache-Control的header；</p>
+<p>· 浏览器再请求这个资源时，先从缓存中寻找，找到这个资源后，比较Expires或Cache-Control的max-age字段值做比较, 如果在有效期内，则读取缓存内容；若缓存已过期，则重新向服务器发送请求；</p>
+<p>· header在重新加载的时候会被更新</p>
+<p>这里我画了两张图，浏览器第一次请求：</p>
+<p><img src="https://user-images.githubusercontent.com/13929056/58398600-29ff1000-8088-11e9-86d8-771ff072be59.png" alt="image"></p>
+<p>浏览器第一次请求</p>
+<p>浏览器再次请求：</p>
+<p><img src="https://user-images.githubusercontent.com/13929056/58398611-32efe180-8088-11e9-9f1f-809c6fceaa67.png" alt="image"></p>
+<p>强缓存</p>
+<p>对于强缓存，chrome浏览器的状态码：</p>
+<p>200 OK(from disk cache)或是200 OK (from memory cache)</p>
+<p>例如：请求某个图片后，当浏览器再次访问这个图片时，发现有这个图片的缓存，且缓存没过期，所以就使用缓存。</p>
+<p>当浏览器发现缓存过期后，缓存并不一定不能使用了。比如文件虽然过了有效期，但内容并没有发生改变，还是可以用缓存数据。所以，这个时候需要与服务器协商，让服务器判断本地缓存是否还能使用。那么又怎么判断服务端文件有没有更新呢？主要有两种方式：</p>
+<p>Last-Modified，If-Modified-since。</p>
+<h3 id="二-协商缓存"><a href="#二-协商缓存" class="headerlink" title="二 协商缓存"></a>二 协商缓存</h3><p>2.1 区分Last-Modified和If-Modified-Since<br>以一个返回的接口为例：</p>
+<p><img src="https://user-images.githubusercontent.com/13929056/58398639-43a05780-8088-11e9-8eea-8ab389d4252c.png" alt="image"></p>
+<p>Last-Modified的格式：</p>
+<p>Last-Modified: Mon, 17 Sep 2018 12:06:18 GMT</p>
+<p>If-Modified-Since的格式：</p>
+<p>If-Modified-Since: Mon, 17 Sep 2018 12:06:18 GMT</p>
+<h3 id="2-2-Etag是什么"><a href="#2-2-Etag是什么" class="headerlink" title="2.2 Etag是什么"></a><strong>2.2 Etag是什么</strong></h3><p>web服务器响应请求时，告诉浏览器当前资源在服务器的唯一标识（生成规则由服务器决定）。Apache中，ETag的值默认是对文件的索引节（INode），大小（Size）和最后修改时间（MTime）进行Hash后得到的。</p>
+<h3 id="2-3-协商缓存的过程"><a href="#2-3-协商缓存的过程" class="headerlink" title="2.3 协商缓存的过程"></a><strong>2.3 协商缓存的过程</strong></h3><p>浏览器第一次请求：</p>
+<p><img src="https://user-images.githubusercontent.com/13929056/58398670-60d52600-8088-11e9-8955-236f22e96ed0.png" alt="image"></p>
+<p>浏览器第一次缓存</p>
+<p>浏览器再一次请求：<br><img src="https://user-images.githubusercontent.com/13929056/58398678-67639d80-8088-11e9-9687-9ada8acca7ca.png" alt="image"></p>
+<p>协商缓存</p>
+<p>Last-Modified、If-Modified-Since：</p>
+<p>· 浏览器第一次向服务器请求一个资源，服务器在返回这个资源的同时，在respone的header加上Last-Modified字段，表示该资源在服务器上的最后修改时间；</p>
+<p>· 浏览器再次向服务器请求这个资源时，在request的header上加上If-Modified-Since字段，这个值就是上一次请求时返回的Last-Modified的值;</p>
+<p>·服务器收到资源请求时，比较If-Modified-Since字段值和被请求资源的最后修改时间，若资源最后修改时间较旧，则说明文件没有修改，返回304 Not Modified, 浏览器从缓存中加载资源；若不相同，说明文件被更新，浏览器直接从服务器加载资源, 返回200；</p>
+<p>·重新加载资源时更新Last-Modified Header</p>
+<p>Etag、If-None-Match</p>
+<p>· 浏览器第一次向服务器请求一个资源，服务器在返回这个资源的同时，在respone的header加上ETag字段；</p>
+<p>·浏览器再次跟服务器请求这个资源时，在request的header上加上If-None-Match，这个值就是上一次请求时返回的ETag的值；</p>
+<p>·服务器再次收到资源请求时，再根据资源生成一个新的ETag，与浏览器传过来If-None-Match比较，如果这两个值相同，则说明资源没有变化，返回304 Not Modified, 浏览器从缓存中加载资源，否则返回200 资源内容。与Last-Modified不一样的是，当服务器返回304 Not Modified的响应时，由于ETag重新生成过，response header中还会把这个ETag返回，即使这个ETag跟之前的没有变化</p>
+<h3 id="2-4-为什么有了Last-Modified，还要用Etag呢？"><a href="#2-4-为什么有了Last-Modified，还要用Etag呢？" class="headerlink" title="2.4 为什么有了Last-Modified，还要用Etag呢？"></a><strong>2.4 为什么有了Last-Modified，还要用Etag呢？</strong></h3><p>HTTP1.1中ETag的出现主要是为了解决几个Last-Modified比较难解决的问题：</p>
+<p>·一些文件也许会周期性的更改，但是他的内容并不改变(仅仅改变的修改时间)，这个时候我们并不希望客户端认为这个文件被修改了，而重新GET；</p>
+<p>·某些文件修改非常频繁，比如在秒以下的时间内进行修改，(比方说1s内修改了N次)，If-Modified-Since能检查到的粒度是s级的，这种修改无法判断(或者说UNIX记录MTIME只能精确到秒)；</p>
+<p>·某些服务器不能精确的得到文件的最后修改时间。</p>
+<p>对于上述情景，利用ETag能够更加准确的控制缓存，因为ETag是服务器自动生成的资源在服务器端的唯一标识符，资源每次变动，都会生成新的ETag值。Last-Modified与ETag是可以一起使用的，但服务器会优先验证ETag。</p>
+<h3 id="2-5-比较强缓存和协商缓存"><a href="#2-5-比较强缓存和协商缓存" class="headerlink" title="2.5 比较强缓存和协商缓存"></a><strong>2.5 比较强缓存和协商缓存</strong></h3><p>基于上文对强缓存和协商缓存过程的解释，这里我把强缓存和协商缓存绘制在一张图里，方便比较，具体过程可以参照上文：<br><img src="https://user-images.githubusercontent.com/13929056/58398736-911cc480-8088-11e9-8ed6-5661b22fb14e.png" alt="image"></p>
+
+      <blockquote class="mdui-m-t-5">
+        
+        <strong>本文链接：</strong><a href="https://longhonour.github.io/2019/09/25/brower-cache/">https://longhonour.github.io/2019/09/25/brower-cache/</a>
+      </blockquote>
+      
+    </div>
+    <footer class="mdui-card-actions">
+      
+        <a class="mdui-ripple article_categories-link" href="/categories/web前端/">web前端</a>
+      
+      
+        <a class="mdui-ripple article_tags-link" href="/tags/css/">css</a><a class="mdui-ripple article_tags-link" href="/tags/js/">js</a><a class="mdui-ripple article_tags-link" href="/tags/浏览器原理/">浏览器原理</a>
+      
+    </footer>
+    
+  </article>
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script>$("#main article .mdui-card-content img.fancybox").on("click",function(e){$.fancybox.open({src:$(this).attr("src")});});</script>
+
+
+  <nav id="paginator">
+    
+      <a rel="prev" class="extend prev" href="/2019/09/25/ie-rgba/">
+        <button aria-label="prev" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-btn-icon mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">arrow_back</i></button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上一篇
+      </a>
+    
+    <div class="spacer"></div>
+    
+  </nav>
+
+
+
+</main>
+  <footer id="footer" class="mdui-m-t-5 mdui-p-y-3 mdui-color-theme">
+  <div class="mdui-p-y-0 mdui-text-center">
+    
+    
+    
+    
+    
+    
+    
+      <a href="https://github.com/longhonour" target="_blank"><i class="mdui-p-a-1 mdui-icon iconfont mdui-text-color-theme-a100">&#xe7ab;</i></a>
+    
+    
+    
+    
+    
+    
+  </div>
+  <div class="mdui-p-y-1 mdui-text-center">
+    Copyright &copy; 2019 - 2019 Cao Long<br>
+    
+  </div>
+</footer>
+  <button id="gotop" class="mdui-fab mdui-fab-fixed mdui-fab-hide mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">arrow_upward</i></button>
+  
+  <script src="/js/mdui.js"></script>
+<script src="/js/script.js"></script>
+</body>
+</html>

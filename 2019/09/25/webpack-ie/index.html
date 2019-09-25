@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="renderer" content="webkit">
+
+  
+  <title>Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题 | 哆龙的博客</title>
+
+  <link rel="shortcut icon" href="/images/favicon.png">
+  
+  <meta name="description" content="Webpack 是一个前端资源加载/打包工具，现在版本已经 release 到 v2.6.1，今天的文章不直接介绍Webpack的API及使用，而是对最近项目开发中使用Webpack打包时处理IE低版本(IE8及以下)浏览器兼容问题做一次总结。 PC端项目前端基础技术选型jQuery + ES6 + EJS + Babel + Webpack：  jQuery：提供选择器和ajax接口兼容支持；">
+<meta name="keywords" content="js,webpack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题">
+<meta property="og:url" content="https://longhonour.github.io/2019/09/25/webpack-ie/index.html">
+<meta property="og:site_name" content="哆龙的博客">
+<meta property="og:description" content="Webpack 是一个前端资源加载/打包工具，现在版本已经 release 到 v2.6.1，今天的文章不直接介绍Webpack的API及使用，而是对最近项目开发中使用Webpack打包时处理IE低版本(IE8及以下)浏览器兼容问题做一次总结。 PC端项目前端基础技术选型jQuery + ES6 + EJS + Babel + Webpack：  jQuery：提供选择器和ajax接口兼容支持；">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-09-25T09:29:44.908Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题">
+<meta name="twitter:description" content="Webpack 是一个前端资源加载/打包工具，现在版本已经 release 到 v2.6.1，今天的文章不直接介绍Webpack的API及使用，而是对最近项目开发中使用Webpack打包时处理IE低版本(IE8及以下)浏览器兼容问题做一次总结。 PC端项目前端基础技术选型jQuery + ES6 + EJS + Babel + Webpack：  jQuery：提供选择器和ajax接口兼容支持；">
+
+  <meta name="format-detection" content="telephone=no,email=no">
+  <meta name="theme-color" content="#9C27B0">
+  <meta name="description" content>
+  <meta name="keywords" content=",js,webpack">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="哆龙的博客">
+  <meta name="msapplication-starturl" content="https://longhonour.github.io/2019/09/25/webpack-ie/">
+  <meta name="msapplication-navbutton-color" content="#9C27B0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="哆龙的博客">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+
+  
+    <meta property="article:published_time" content="Wed Sep 25 2019 17:04:23 GMT+0800">
+    <meta property="article:modified_time" content="Wed Sep 25 2019 17:29:44 GMT+0800">
+  
+
+  
+    <link rel="canonical" href="https://longhonour.github.io/2019/09/25/webpack-ie/">
+  
+
+  
+  
+
+  
+  
+  
+
+  <link rel="stylesheet" href="/css/mdui.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-deep-purple mdui-theme-accent-blue">
+  <script>var a=localStorage.getItem("mdui-theme-layout-dark");if(a){document.getElementsByTagName("body")[0].className+=" mdui-theme-layout-dark"};</script>
+  <header id="header" class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-hide mdui-appbar-inset">
+  <div class="mdui-toolbar mdui-color-theme">
+    <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#sidebar', swipe: true}"><i class="mdui-icon material-icons">menu</i></a>
+    <a href="/" class="mdui-typo-headline">哆龙的博客</a>
+    <div class="mdui-toolbar-spacer"></div>
+    <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-dialog="{target: '#search'}" mdui-tooltip="{content: '搜索'}"><i class="mdui-icon material-icons">search</i></a>
+    
+  </div>
+</header>
+<div class="mdui-dialog" id="search">
+  
+    <div class="search-form">
+      <input type="search" class="search-form-input" placeholder="请输入关键字搜索">
+    </div>
+    <div class="search-result" data-resource="/search.xml"></div>
+  
+</div>
+  <aside id="sidebar" class="mdui-drawer mdui-drawer-full-height">
+  <div class="mdui-grid-tile">
+    <img src="/images/banner.png" style="height: 160px;">
+    <img src="/images/avatar.png" class="avatar-animation" style="position: absolute; top: 10%; left: 50%; margin-left: -32px; width: 64px; height: 64px; border: 2px solid #fff; border-radius: 50%;">
+    <div class="mdui-grid-tile-actions">
+      <div class="mdui-grid-tile-text">
+        <div class="mdui-grid-tile-title">Cao Long</div>
+        <div class="mdui-grid-tile-subtitle"><i class="mdui-icon material-icons">art_track</i>竹杖芒鞋轻胜马，谁怕？</div>
+      </div>
+      
+        <div class="mdui-grid-tile-buttons">
+          <a href="mailto:2286410840cl@gmail.com" class="mdui-btn mdui-btn-icon" mdui-tooltip="{content: '2286410840cl@gmail.com'}"><i class="mdui-icon material-icons">email</i></a>
+        </div>
+      
+    </div>
+  </div>
+
+  <div class="mdui-list" mdui-collapse="{accordion: true}">
+    <a href="/" class="mdui-list-item mdui-ripple">
+      <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue">home</i>
+      <div class="mdui-list-item-content">主页</div>
+    </a>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-deep-orange">inbox</i>
+        <div class="mdui-list-item-content">归档</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/archives/2019/09/">九月 2019<span class="mdui-ripple sidebar_archives-count">3</span></a>
+        
+      </div>
+    </div>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-green">chrome_reader_mode</i>
+        <div class="mdui-list-item-content">分类</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/categories/web前端/">web前端<span class="mdui-ripple sidebar_archives-count">3</span></a>
+        
+      </div>
+    </div>
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-brown">bookmark</i>
+        <div class="mdui-list-item-content">标签</div>
+        <i class="mdui-collapse-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+        <a class="mdui-ripple sidebar_archives-link" href="/tags/css/">css<span class="mdui-ripple sidebar_archives-count">2</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/js/">js<span class="mdui-ripple sidebar_archives-count">2</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/webpack/">webpack<span class="mdui-ripple sidebar_archives-count">1</span></a><a class="mdui-ripple sidebar_archives-link" href="/tags/浏览器原理/">浏览器原理<span class="mdui-ripple sidebar_archives-count">1</span></a>
+        
+      </div>
+    </div>
+    <a href="/about" class="mdui-list-item mdui-ripple">
+      <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-purple">person</i>
+      <div class="mdui-list-item-content">关于</div>
+    </a>
+  </div>
+
+  <div class="mdui-divider"></div>
+
+  <div class="mdui-list" mdui-collapse="{accordion: true}">
+    
+    <div class="mdui-collapse-item">
+      <div class="mdui-collapse-item-header mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">友情链接</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">link</i>
+      </div>
+      <div class="mdui-collapse-item-body mdui-list mdui-list-dense">
+        
+          <a href="https://github.com/longhonour" target="_blank" class="mdui-list-item mdui-ripple mdui-p-l-2 mdui-text-color-theme-accent" style="justify-content: center;">Github</a>
+        
+        
+      </div>
+    </div>
+  </div>
+</aside>
+  <main id="main" class="mdui-m-t-5 fadeIn animated">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/fancybox/3.5.7/jquery.fancybox.min.css">
+  <style>#main article .mdui-card-content .center-block{display:block!important;margin-right:auto!important;margin-left:auto!important}</style>
+  <article class="mdui-card mdui-m-b-5">
+    <header class="mdui-card-media">
+      <img src="/images/random/material-7.png" style="max-height: 240px;">
+      <div class="mdui-card-media-covered">
+        <div class="mdui-card-primary">
+          <div class="mdui-card-primary-title">Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题</div>
+          <div class="mdui-card-primary-subtitle"><i class="iconfont">&#xe697;</i> 2019-09-25 / <i class="iconfont">&#xe601;</i> Cao Long</div>
+        </div>
+      </div>
+      <div class="mdui-card-menu">
+        
+          <button class="mdui-btn mdui-btn-icon mdui-text-color-white" mdui-menu="{target: '#qrcode', align: 'right'}"><i class="mdui-icon material-icons">devices</i></button>
+          <ul class="mdui-menu" id="qrcode">
+            
+              <li class="mdui-menu-item"><a class="mdui-text-center mdui-ripple">移动端查看</a></li>
+            
+            <li class="mdui-menu-item" disabled>
+              
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACYUlEQVR42u3aQVLDMBAEwPz/0/AACmdmJSuGap0oYkdqHyxldl9f/3q88PDw8PDw8PDwHsZ7xaOY4PL63775512zteHh4eGd4a0v95rx88pfF3cJTmbHw8PDO8lLXtnXmHaJ+VzFdoKHh4f3B3k5pp0XDw8P76/z2qW8OQoHx2s8PDy8p/GSH/yzYKJlfCxrwcPDw4t5eZHp/N9H63t4eHh4Aa8dbRiRLzffDN6sEA8PD+9mXjt9Gw0kB+XZxoCHh4f3WV4SqrYH8fz6a/Z1q1bxiwEPDw9vEy8p8O9lzOLgIkrGw8PDO8hr263WwbNN4k1TAh4eHt7NvOTFvRLFzsr/yaPf9osBDw8Pb8Rb2QZy5OwY3X4nHh4e3nleEka0EUb+KFeO3Xh4eHgneW35/47wYlsEjIeHh3czb73o1TZjJcFHvi1FrQN4eHh4W3nFbeUS8+1k1nRVhBF4eHh4R3j5xG08kRe62hgCDw8P7yQvuq18xSfsWTBRN13h4eHh3cAbFunbiUt2u4Hh4eHhfYrXxrXtNUmBLY9uizACDw8PbysvmXi9HaoNhduNCg8PD+88LwkgkkLU7JG1j6MogOHh4eHdxstfxHVRKv50Ft3i4eHhneS1o26Biq/ZFlXg4eHh3cxbKtLHxaq9R/NhTxkeHh7eVt5K5JrA2uaqlfACDw8P7yRv1oCVH5cfkbXg4eHhfYiXH5R3lc3yBlY8PDy8Z/Ly1quVw3RSeLtx38PDw8PbFEbMQof65T4qkuHh4eGd5M1e97P/5J8mwS4eHh7eed7/G3h4eHh4eHh4eA8Y3yCCzkrBryeAAAAAAElFTkSuQmCC">
+              
+            </li>
+          </ul>
+        
+        
+          <button class="mdui-btn mdui-btn-icon mdui-text-color-white" mdui-menu="{target: '#share_menu', align: 'right'}"><i class="mdui-icon material-icons">share</i></button>
+          <ul class="mdui-menu" id="share_menu">
+            <li class="mdui-menu-item">
+              <a href="http://service.weibo.com/share/share.php?appkey=&title=Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题&url=https://longhonour.github.io/2019/09/25/webpack-ie/&pic=https://longhonour.github.io/images/favicon.png&searchPic=false&style=simple" target="_blank" class="mdui-ripple">分享到微博</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://twitter.com/intent/tweet?text=Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题&url=https://longhonour.github.io/2019/09/25/webpack-ie/&via=Cao Long" target="_blank" class="mdui-ripple">分享到Twitter</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https://longhonour.github.io/2019/09/25/webpack-ie/" target="_blank" class="mdui-ripple">分享到Facebook</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://longhonour.github.io/2019/09/25/webpack-ie/&title=Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题" target="_blank" class="mdui-ripple">分享到LinkedIn</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="http://connect.qq.com/widget/shareqq/index.html?site=哆龙的博客&title=Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题&summary=&pics=https://longhonour.github.io/images/favicon.png&url=https://longhonour.github.io/2019/09/25/webpack-ie/" target="_blank" class="mdui-ripple">分享到QQ</a>
+            </li>
+            <li class="mdui-menu-item">
+              <a href="https://telegram.me/share/url?url=https://longhonour.github.io/2019/09/25/webpack-ie/&text=Webpack打包处理IE低版本(IE8及以下)浏览器兼容问题" target="_blank" class="mdui-ripple">分享到Telegram</a>
+            </li>
+          </ul>
+        
+      </div>
+    </header>
+    <div class="mdui-card-content mdui-typo">
+      <p><a href="https://webpack.js.org/" target="_blank" rel="noopener">Webpack</a> 是一个前端资源加载/打包工具，现在版本已经 release 到 v2.6.1，今天的文章不直接介绍Webpack的API及使用，而是对最近项目开发中使用Webpack打包时处理IE低版本(IE8及以下)浏览器兼容问题做一次总结。</p>
+<p>PC端项目前端基础技术选型jQuery + ES6 + EJS + Babel + Webpack：</p>
+<ul>
+<li>jQuery：提供选择器和ajax接口兼容支持；</li>
+<li>ES6：跟进前端趋势，方便向后兼容；</li>
+<li>EJS：提供前端模板引擎支持；</li>
+<li>Babel：提供 ES6 转码支持；</li>
+<li>Webpack: 提高前端资源加载/打包；</li>
+</ul>
+<p>项目开发过程都在 Chrome 浏览器中，一切都OK，没有任何问题，当在IE9以下浏览器中调试发现好多坑，现总结如下，以后新手参考。</p>
+<h2 id="Case-One-default-、-class、catch-ES3中保留字问题"><a href="#Case-One-default-、-class、catch-ES3中保留字问题" class="headerlink" title="Case One: default 、 class、catch ES3中保留字问题"></a>Case One: <code>default</code> 、 <code>class</code>、<code>catch</code> ES3中保留字问题</h2><p>报错信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SCRIPT1048: 缺少标识符</span><br></pre></td></tr></table></figure>
+
+<p>对应代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">e.n = function (t) &#123;</span><br><span class="line">    var n = t &amp;&amp; t.__esModule ? function () &#123;</span><br><span class="line">        return t.default</span><br><span class="line">    &#125; : function () &#123;</span><br><span class="line">        return t</span><br><span class="line">    &#125;;</span><br><span class="line">    return e.d(n, &quot;a&quot;, n), n</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>网上查找资料，webpack有一款loader插件<a href="https://www.npmjs.com/package/es3ify-loader" target="_blank" rel="noopener">es3ify-loader</a>来处理ES3的兼容问题，修改webpack配置，问题解决，添加规则如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">module: &#123;</span><br><span class="line">    rules: [&#123;</span><br><span class="line">            test: /.js$/,</span><br><span class="line">            enforce: &apos;post&apos;, // post-loader处理</span><br><span class="line">            loader: &apos;es3ify-loader&apos;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个loader是干啥用的捏，就是把这些保留字给你加上引号，使用字符串的形式引用，请看实例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 编译前</span><br><span class="line">function(t) &#123; return t.default; &#125;</span><br><span class="line"></span><br><span class="line">// 编译后</span><br><span class="line">function(t) &#123; return t[&quot;default&quot;]; &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Two-uglify-js产生问题"><a href="#Case-Two-uglify-js产生问题" class="headerlink" title="Case Two: uglify-js产生问题"></a>Case Two: uglify-js产生问题</h2><p>重新构建，在IE低版本浏览器预览，使用 <code>webpack.optimize.UglifyJsPlugin</code> 压缩时，又报上面同样的错误了，重新采用 beauty:true, build 发现引号被压缩掉了，究其原因，研究了下uglify-js默认配置，发现了 <code>compress.properties</code> 属性，增加build options如下，问题解决：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">new webpack.optimize.UglifyJsPlugin(&#123;</span><br><span class="line">    compress: &#123;</span><br><span class="line">        properties: false,</span><br><span class="line">        warnings: false</span><br><span class="line">    &#125;,</span><br><span class="line">    output: &#123;</span><br><span class="line">        beautify: true</span><br><span class="line">    &#125;,</span><br><span class="line">    sourceMap: false</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Three-uglify-js问题"><a href="#Case-Three-uglify-js问题" class="headerlink" title="Case Three: uglify-js问题"></a>Case Three: uglify-js问题</h2><p>重新构建，在IE低版本浏览器预览，使用 <code>webpack.optimize.UglifyJsPlugin</code> 压缩时，又报上面同样的错误了，报错代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    catch: function (t) &#123;</span><br><span class="line">        return this.then(null, t)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>继续查找uglify-js配置，发现 <code>output.quote_keys</code>，修改build options，问题解决：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">new webpack.optimize.UglifyJsPlugin(&#123;</span><br><span class="line">    compress: &#123;</span><br><span class="line">        properties: false,</span><br><span class="line">        warnings: false</span><br><span class="line">    &#125;,</span><br><span class="line">    output: &#123;</span><br><span class="line">        beautify: true,</span><br><span class="line">        quote_keys: true</span><br><span class="line">    &#125;,</span><br><span class="line">    sourceMap: false</span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+
+<p>编译后：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;catch&quot;: function(t) &#123;</span><br><span class="line">        return this.then(null, t);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Four-uglify-js问题"><a href="#Case-Four-uglify-js问题" class="headerlink" title="Case Four: uglify-js问题"></a>Case Four: uglify-js问题</h2><p>重新构建，在IE低版本浏览器预览，报错信息如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SCRIPT3126: 无法设置未定义或 null 引用的属性</span><br></pre></td></tr></table></figure>
+
+<p>继续分析压缩后代码，发现还是uglify-js问题，其mangle 配置属性 <code>mangle.screw_ie8</code> 默认为 true， 什么意思捏，意思就是把支持IE8的代码clear掉，screw you =&gt; 去你的，修改压缩配置项，重新编译，问题解决：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">new webpack.optimize.UglifyJsPlugin(&#123;</span><br><span class="line">    compress: &#123;</span><br><span class="line">        properties: false,</span><br><span class="line">        warnings: false</span><br><span class="line">    &#125;,</span><br><span class="line">    output: &#123;</span><br><span class="line">        beautify: true,</span><br><span class="line">        quote_keys: true</span><br><span class="line">    &#125;,</span><br><span class="line">    mangle: &#123;</span><br><span class="line">        screw_ie8: false</span><br><span class="line">    &#125;,</span><br><span class="line">    sourceMap: false</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Five-ES5的API兼容报错"><a href="#Case-Five-ES5的API兼容报错" class="headerlink" title="Case Five: ES5的API兼容报错"></a>Case Five: ES5的API兼容报错</h2><p>在 webpack 的 entry 入口文件top引入 <code>es5-shim</code> 问题解决</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">require(&apos;es5-shim&apos;);</span><br><span class="line">require(&apos;es5-shim/es5-sham&apos;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Six-Console-log-问题"><a href="#Case-Six-Console-log-问题" class="headerlink" title="Case Six: Console.log 问题"></a>Case Six: Console.log 问题</h2><p>在 webpack 的 entry 入口文件top引入 <code>console-polyfill</code> 问题解决</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">require(&apos;console-polyfill&apos;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Seven-Promise-兼容"><a href="#Case-Seven-Promise-兼容" class="headerlink" title="Case Seven: Promise 兼容"></a>Case Seven: Promise 兼容</h2><p>在 webpack 的 entry 入口文件top引入 <code>es6-promise</code> 问题解决</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">require(&apos;es6-promise&apos;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Case-Eight-Object-defineProperty-问题"><a href="#Case-Eight-Object-defineProperty-问题" class="headerlink" title="Case Eight: Object.defineProperty 问题"></a>Case Eight: Object.defineProperty 问题</h2><p>这个case 应该说是最难搞的一个case了，耗时也比较长，关键点在于使用 <code>es5-shim</code>/<code>es5-sham</code>也有问题，查看你官网发现在低版本浏览器也会有问题，官网描述如下：</p>
+<blockquote>
+<p>⚠️ Object.defineProperty<br>In the worst of circumstances, IE 8 provides a version of this method that only works on DOM objects. This sham will not be installed. The given version of defineProperty will throw an exception if used on non-DOM objects.<br>In slightly better circumstances, this method will silently fail to set “writable”, “enumerable”, and “configurable” properties.<br>Providing a getter or setter with “get” or “set” on a descriptor will silently fail on engines that lack “defineGetter” and “defineSetter”, which include all versions of IE.<br><a href="https://github.com/es-shims/es5-shim/issues#issue/5" target="_blank" rel="noopener">https://github.com/es-shims/es5-shim/issues#issue/5</a></p>
+</blockquote>
+<p>那这个Object.defineProperty 是如何产生的呢，这个是babel编译后产生的，当我们在代码使用 <code>import``export</code> ES6 Module时出现的，那你可能最直接的想法就是我不用ES6 Module了，改用Commonjs规范，OK，修改后编译，确实解决了问题，但是查看代码里还是有一段代码的，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">e.d = function(t, n, r) &#123;</span><br><span class="line">    e.o(t, n) || Object.defineProperty(t, n, &#123;</span><br><span class="line">        &quot;configurable&quot;: !1,</span><br><span class="line">        &quot;enumerable&quot;: !0,</span><br><span class="line">        &quot;get&quot;: r</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;, e.n = function(t) &#123;</span><br><span class="line">    var n = t &amp;&amp; t.__esModule ? function() &#123;</span><br><span class="line">        return t[&quot;default&quot;];</span><br><span class="line">    &#125; : function() &#123;</span><br><span class="line">        return t;</span><br><span class="line">    &#125;;</span><br><span class="line">    return e.d(n, &quot;a&quot;, n), n;</span><br><span class="line">&#125;, e.o = function(t, e) &#123;</span><br><span class="line">    return Object.prototype.hasOwnProperty.call(t, e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看代码已经做了容错判断。</p>
+<h2 id="Case-Nine-Object-defineProperty-问题"><a href="#Case-Nine-Object-defineProperty-问题" class="headerlink" title="Case Nine: Object.defineProperty 问题"></a>Case Nine: Object.defineProperty 问题</h2><p>重新构建，加入 <code>json3</code> 处理 JSON 对象兼容时，代码在此处抛出了异常：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">var hasGetter = &apos;get&apos; in descriptor;</span><br><span class="line">var hasSetter = &apos;set&apos; in descriptor;</span><br><span class="line">if (!supportsAccessors &amp;&amp; (hasGetter || hasSetter)) &#123;</span><br><span class="line">    throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析supportsAccessors代码逻辑：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var supportsAccessors = owns(prototypeOfObject, &apos;__defineGetter__&apos;);</span><br></pre></td></tr></table></figure>
+
+<p>通过断点调试，supportsAccessors值为false且hasGetter或者hasSetter时抛出了异常，也就是说当前js引擎不支持访问器属性，却在属性描述符中设置了get，set,那么就会抛出异常。查看 <a href="https://github.com/zuojj/fedlab/issues/“defineGetter”的兼容情况是只兼容IE11" target="_blank" rel="noopener">defineGetter</a> 的兼容情况，只兼容IE11，虽然IE9、IE10同样不支持defineGetter,不过他们直接支持Object.defineProperty方法和get语法，无需sham，所以代码并不会走到异常这里。但是IE8以下就扯淡了。解决这种情况只能修改源代码了。</p>
+<p>至此，Webpack打包时，IE低版本浏览器(IE8及以下)遇到的兼容问题就总结这里，如果你有新的问题，欢迎留言。</p>
+
+      <blockquote class="mdui-m-t-5">
+        
+        <strong>本文链接：</strong><a href="https://longhonour.github.io/2019/09/25/webpack-ie/">https://longhonour.github.io/2019/09/25/webpack-ie/</a>
+      </blockquote>
+      
+    </div>
+    <footer class="mdui-card-actions">
+      
+        <a class="mdui-ripple article_categories-link" href="/categories/web前端/">web前端</a>
+      
+      
+        <a class="mdui-ripple article_tags-link" href="/tags/js/">js</a><a class="mdui-ripple article_tags-link" href="/tags/webpack/">webpack</a>
+      
+    </footer>
+    
+  </article>
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+  <script>$("#main article .mdui-card-content img.fancybox").on("click",function(e){$.fancybox.open({src:$(this).attr("src")});});</script>
+
+
+  <nav id="paginator">
+    
+    <div class="spacer"></div>
+    
+      <a rel="next" class="extend next" href="/2019/09/25/ie-rgba/">
+        下一篇&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button aria-label="next" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-btn-icon mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">arrow_forward</i></button>
+      </a>
+    
+  </nav>
+
+
+
+</main>
+  <footer id="footer" class="mdui-m-t-5 mdui-p-y-3 mdui-color-theme">
+  <div class="mdui-p-y-0 mdui-text-center">
+    
+    
+    
+    
+    
+    
+    
+      <a href="https://github.com/longhonour" target="_blank"><i class="mdui-p-a-1 mdui-icon iconfont mdui-text-color-theme-a100">&#xe7ab;</i></a>
+    
+    
+    
+    
+    
+    
+  </div>
+  <div class="mdui-p-y-1 mdui-text-center">
+    Copyright &copy; 2019 - 2019 Cao Long<br>
+    
+  </div>
+</footer>
+  <button id="gotop" class="mdui-fab mdui-fab-fixed mdui-fab-hide mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">arrow_upward</i></button>
+  
+  <script src="/js/mdui.js"></script>
+<script src="/js/script.js"></script>
+</body>
+</html>
